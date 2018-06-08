@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {PostModel} from '../post.model';
+import {Post} from '../post';
 import {NgForm} from '@angular/forms';
 import {PostService} from '../post.service';
 
@@ -16,7 +16,7 @@ export class PostCreateComponent implements OnInit {
   }
 
   onAddPost(form: NgForm) {
-    const post: PostModel = {
+    const post: Post = {
       title: form.value.title,
       content: form.value.content
     };
