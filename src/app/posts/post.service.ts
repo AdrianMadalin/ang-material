@@ -51,19 +51,7 @@ export class PostService {
         post.id = responseData.post['_id'];
         this.posts.push(post);
         this.postsUpdated.next([...this.posts]);
-      });
-  }
-
-  deteletPost(id: number, index: number) {
-    const url = 'http://localhost:8080/api/posts';
-    const headers = new HttpHeaders();
-    headers.append('Content-Type', 'application/json');
-    this.http
-      .put(url, {_id: id}, {headers})
-      .subscribe((recivedResponse) => {
-        this.posts.splice(index, 1);
-        this.postsUpdated.next([...this.posts]);
-        console.log(recivedResponse);
+        this.router.navigate([`/`]);
       });
   }
 
@@ -96,7 +84,7 @@ export class PostService {
           const oldPostIndex = updatedPosts.findIndex( p => p.id === post.id);
           updatedPosts[oldPostIndex] = post;
           this.postsUpdated.next([...this.posts]);
-          // this.router.navigate([`/`]);
+          this.router.navigate([`/`]);
         }
       });
   }
