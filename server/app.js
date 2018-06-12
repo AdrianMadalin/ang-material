@@ -61,11 +61,10 @@ app.put('/api/posts/:id', (req, res, next) => {
   });
   PostModel.updateOne({_id: req.params.id}, post)
     .then(result => {
-      console.log(result);
       res.status(200).json({
         message: 'success'
       });
-    })
+    });
 });
 
 app.delete('/api/posts/:id', (req, res, next) => {
@@ -83,8 +82,23 @@ app.delete('/api/posts/:id', (req, res, next) => {
       res.status(502).json({
         message: `fail to delete post ${req.body.title}`,
         error
-      })
+      });
     });
+});
+
+app.get('/api/posts/:id', (req,res,next) =>{
+  PostModel.findById(req.params.id).then((post) =>{
+    if(post) {
+      res.status(200).json({
+        message: 'success',
+        post
+      });
+    } else {
+      res.status(404).json({
+        message: 'fail'
+      });
+    }
+  });
 });
 
 module.exports = app;
