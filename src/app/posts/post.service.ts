@@ -27,7 +27,8 @@ export class PostService {
           return {
             id: post._id,
             title: post.title,
-            content: post.content
+            content: post.content,
+            imagePath: post.imagePath
           };
         });
       }))
@@ -42,13 +43,23 @@ export class PostService {
     return this.postsUpdated.asObservable();
   }
 
-  addPosts(post: Post) {
+  addPosts(title: string, content: string, image: File) {
+    const postData = new FormData();
+    postData.append('title', title);
+    postData.append('content', content);
+    postData.append('image', image, title);
+
     const url = 'http://localhost:8080/api/posts';
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    this.http.post<{ message: string, post: object }>(url, post, {headers})
+    this.http.post<{ message: string, post: object }>(url, postData, {headers})
       .subscribe((responseData) => {
-        post.id = responseData.post['_id'];
+        const post: Post = {
+          id: responseData.post['_id'],
+          title: responseData.post['title'],
+          content: responseData.post['content'],
+          imagePath: responseData.post['imagePath']
+        };
         this.posts.push(post);
         this.postsUpdated.next([...this.posts]);
         this.router.navigate([`/`]);
@@ -71,18 +82,26 @@ export class PostService {
     return this.http.get<{message: string, post: Post}>(url);
   }
 
-  updatePost(id: string, title: string, content: string) {
+  updatePost(id: string, title: string, content: string, image: File | string) {
     const url = 'http://localhost:8080/api/posts/' + id;
     const headers = new HttpHeaders().append('Content-Type', 'application/json');
-    const post: Post = {id, title, content};
+
+    if(typeof(image) === 'object') {
+      const postData = new FormData();
+      postData.append('title', title);
+      postData.append('content', content);
+      postData.append('image', image, title);
+    } else {
+      const postData: Post = {id, title, content, imagePath: null};
+    }
     this.http
-      .put<{ message: string }>(url, post, {headers})
+      .put<{ message: string }>(url, postData, {headers})
       .subscribe((response) => {
         console.log(response);
         if (response.message === 'success') {
           const updatedPosts = [...this.posts];
-          const oldPostIndex = updatedPosts.findIndex( p => p.id === post.id);
-          updatedPosts[oldPostIndex] = post;
+          const oldPostIndex = updatedPosts.findIndex( p => p.id === postData.id);
+          updatedPosts[oldPostIndex] = postData;
           this.postsUpdated.next([...this.posts]);
           this.router.navigate([`/`]);
         }

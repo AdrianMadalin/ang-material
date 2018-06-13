@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const PostModel = require('./models/post');
 const postsRoute = require('./routes/posts');
+const path = require('path');
 
 // uFp5AQEVBD8ERdzC
 const url = 'mongodb://adi:123qwe@ds253960.mlab.com:53960/mean-app';
@@ -15,6 +16,7 @@ mongoose.connect(url).then(() => {
 });
 
 app.use(bodyParser.json());
+app.use('/images', express.static(path.join('server/images')));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

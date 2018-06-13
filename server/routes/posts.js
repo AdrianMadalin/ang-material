@@ -1,6 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const PostModel = require('../models/post');
+const multer = require('multer');
+
+const mimetype = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg'
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const isValid = mimetype[file.mimetype];
+    let error = new Error('Invalid mime type');
+    if (isValid) {
+      error = null;
+    }
+    cb(error, 'server/images');
+  },
+  filename: (req, file, cb) => {
+    const name = file.originalname.toLowerCase().split(' ').join('-');
+    const ext = mimetype[file.mimetype];
+    cb(null, name + '-' + Date.now() + '.' + ext);
+  }
+});
 
 router.get('/', (req, res, next) => {
   PostModel.find({}).then(posts => {
@@ -16,8 +39,13 @@ router.get('/', (req, res, next) => {
   });
 });
 
-router.post('/', (req, res, next) => {
-  const post = new PostModel({title: req.body.title, content: req.body.content});
+router.post('/', multer({storage: storage}).single('image'), (req, res, next) => {
+  const url = req.protocol + '://' + req.get('host');
+  const post = new PostModel({
+    title: req.body.title,
+    content: req.body.content,
+    imagePath: url + '/images/' + req.file.filename
+  });
   post.save((error, savedPost) => {
     if (error) {
       res.status(502).json({
@@ -66,9 +94,9 @@ router.delete('/:id', (req, res, next) => {
     });
 });
 
-router.get('/:id', (req,res,next) =>{
-  PostModel.findById(req.params.id).then((post) =>{
-    if(post) {
+router.get('/:id', (req, res, next) => {
+  PostModel.findById(req.params.id).then((post) => {
+    if (post) {
       res.status(200).json({
         message: 'success',
         post
