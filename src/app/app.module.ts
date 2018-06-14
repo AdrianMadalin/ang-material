@@ -14,14 +14,18 @@ import { HeaderComponent } from './header/header.component';
 import { PostListComponent } from './posts/post-list/post-list.component';
 import {HttpClientModule} from '@angular/common/http';
 import {AppRoutingModule} from './app-routing.module';
-import {MatProgressSpinnerModule} from '@angular/material';
+import {MatPaginatorModule, MatProgressSpinnerModule} from '@angular/material';
+import { LoginComponent } from './auth/login/login.component';
+import { SignupComponent } from './auth/signup/signup.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PostCreateComponent,
     HeaderComponent,
-    PostListComponent
+    PostListComponent,
+    LoginComponent,
+    SignupComponent
   ],
   imports: [
     BrowserModule,
@@ -31,6 +35,7 @@ import {MatProgressSpinnerModule} from '@angular/material';
     MatToolbarModule,
     MatExpansionModule,
     MatProgressSpinnerModule,
+    MatPaginatorModule,
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,

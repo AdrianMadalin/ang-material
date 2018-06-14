@@ -1,7 +1,9 @@
 <mat-toolbar color="primary">
   <span><a [routerLink]="''">My Application</a></span>
   <span class="spacer"></span>
-  <ul>
+  <ul class="tabs">
     <li><a mat-button [routerLink]="'create'" routerLinkActive="mat-accent">Create post</a></li>
+    <li><a mat-button [routerLink]="'signup'" routerLinkActive="mat-accent">Sign up!</a></li>
+    <li><a mat-button [routerLink]="'login'" routerLinkActive="mat-accent">Login</a></li>
   </ul>
 </mat-toolbar>

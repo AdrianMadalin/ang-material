@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const PostModel = require('./models/post');
 const postsRoute = require('./routes/posts');
 const path = require('path');
 

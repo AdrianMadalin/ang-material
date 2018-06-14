@@ -26,16 +26,32 @@ const storage = multer.diskStorage({
 });
 
 router.get('/', (req, res, next) => {
-  PostModel.find({}).then(posts => {
+  const postsPerPage = +req.query.ppg;
+  const currentPage = +req.query.page;
+  const postQuery = PostModel.find();
+  let fetchedPosts;
+
+  if (postsPerPage && currentPage) {
+    postQuery
+      .skip(postsPerPage * (currentPage - 1))
+      .limit(postsPerPage);
+  }
+
+  postQuery.find({}).then(posts => {
+    fetchedPosts = posts;
+    return PostModel.count();
+  }).then(count => {
+    console.log(count);
     res.status(200).json({
       message: 'success',
-      posts
+      posts: fetchedPosts,
+      maxPosts: count
     });
   }).catch(error => {
     res.status(502).json({
       message: 'fail',
       error
-    })
+    });
   });
 });
 
@@ -92,7 +108,7 @@ router.delete('/:id', (req, res, next) => {
             message: 'success',
             deletedPost: post
           });
-        })
+        });
     })
     .catch((error) => {
       res.status(502).json({
