@@ -79,29 +79,34 @@ export class PostService {
 
   getPost(id: string) {
     const url = 'http://localhost:8080/api/posts/' + id;
-    return this.http.get<{message: string, post: Post}>(url);
+    return this.http.get<{ message: string, post: Post }>(url);
   }
 
   updatePost(id: string, title: string, content: string, image: File | string) {
     const url = 'http://localhost:8080/api/posts/' + id;
-    const headers = new HttpHeaders().append('Content-Type', 'application/json');
-
-    if(typeof(image) === 'object') {
-      const postData = new FormData();
+    const headers = new HttpHeaders();
+    headers.append('Content-Type', 'application/json');
+    let postData: Post | FormData;
+    if (typeof(image) === 'object') {
+      console.log(image);
+      postData = new FormData();
+      postData.append('id', id);
       postData.append('title', title);
       postData.append('content', content);
       postData.append('image', image, title);
     } else {
-      const postData: Post = {id, title, content, imagePath: null};
+      postData = {id, title, content, imagePath: image};
     }
+
     this.http
-      .put<{ message: string }>(url, postData, {headers})
+      .put<{ message: string, post: Post }>(url, postData, {headers})
       .subscribe((response) => {
         console.log(response);
         if (response.message === 'success') {
           const updatedPosts = [...this.posts];
-          const oldPostIndex = updatedPosts.findIndex( p => p.id === postData.id);
-          updatedPosts[oldPostIndex] = postData;
+          const oldPostIndex = updatedPosts.findIndex(p => p.id === id);
+          const post: Post = {id, title, content, imagePath: response.post.imagePath};
+          updatedPosts[oldPostIndex] = post;
           this.postsUpdated.next([...this.posts]);
           this.router.navigate([`/`]);
         }

@@ -61,16 +61,24 @@ router.post('/', multer({storage: storage}).single('image'), (req, res, next) =>
   });
 });
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', multer({storage: storage}).single('image'), (req, res, next) => {
+  let imagePath = req.body.imagePath;
+  if (req.file) {
+    const url = req.protocol + '://' + req.get('host');
+    imagePath = url + '/images/' + req.file.filename
+  }
   const post = new PostModel({
     _id: req.body.id,
     title: req.body.title,
-    content: req.body.content
+    content: req.body.content,
+    imagePath: imagePath
   });
+  console.log(post);
   PostModel.updateOne({_id: req.params.id}, post)
     .then(result => {
       res.status(200).json({
-        message: 'success'
+        message: 'success',
+        post
       });
     });
 });

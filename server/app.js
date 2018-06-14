@@ -15,7 +15,8 @@ mongoose.connect(url).then(() => {
   console.log(error);
 });
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 app.use('/images', express.static(path.join('server/images')));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use((req, res, next) => {
