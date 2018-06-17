@@ -4,6 +4,8 @@ import {Subject} from 'rxjs';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import {Router} from '@angular/router';
+import {AuthData} from '../auth/auth-data.model';
+import {AuthService} from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,8 @@ export class PostService {
   public postsUpdated: Subject<{posts: Post[], postCount: number}> = new Subject<{posts: Post[], postCount: number}>();
 
   constructor(private http: HttpClient,
-              private router: Router) {
+              private router: Router,
+              private authService: AuthService) {
   }
 
   getPosts(ppg: number, currentPage: number) {
@@ -30,14 +33,13 @@ export class PostService {
               id: post._id,
               title: post.title,
               content: post.content,
-              imagePath: post.imagePath
+              imagePath: post.imagePath,
+              creator: post.creator
             };
           }), maxPosts: postData.maxPosts
         };
       }))
       .subscribe((transformedPostData) => {
-        console.log(transformedPostData.posts);
-        console.log(transformedPostData.maxPosts);
         this.posts = transformedPostData.posts;
         this.postsUpdated.next({posts: [...this.posts], postCount: transformedPostData.maxPosts});
       });
@@ -62,7 +64,8 @@ export class PostService {
           id: responseData.post['_id'],
           title: responseData.post['title'],
           content: responseData.post['content'],
-          imagePath: responseData.post['imagePath']
+          imagePath: responseData.post['imagePath'],
+          creator: responseData.post['creator'],
         };
         this.posts.push(post);
         this.router.navigate([`/`]);
@@ -93,7 +96,7 @@ export class PostService {
       postData.append('content', content);
       postData.append('image', image, title);
     } else {
-      postData = {id, title, content, imagePath: image};
+      postData = {id, title, content, imagePath: image, creator: null};
     }
 
     this.http
@@ -103,7 +106,7 @@ export class PostService {
         if (response.message === 'success') {
           const updatedPosts = [...this.posts];
           const oldPostIndex = updatedPosts.findIndex(p => p.id === id);
-          const post: Post = {id, title, content, imagePath: response.post.imagePath};
+          const post: Post = {id, title, content, imagePath: response.post.imagePath, creator: response.post.creator};
           updatedPosts[oldPostIndex] = post;
           this.router.navigate([`/`]);
         }

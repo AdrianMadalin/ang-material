@@ -28,7 +28,8 @@
     <button mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="!signupForm.valid"> Sign up!
+            [disabled]="!signupForm.valid"
+            *ngIf="!isLoading"> Sign up!
     </button>
   </form>
 </mat-card>

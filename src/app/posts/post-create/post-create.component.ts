@@ -1,28 +1,34 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Post} from '../post';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {PostService} from '../post.service';
 import {ActivatedRoute, ParamMap} from '@angular/router';
 import {mimeType} from './mime-type.validator';
+import {Subscription} from 'rxjs';
+import {AuthService} from '../../auth/auth.service';
 
 @Component({
   selector: 'app-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css']
 })
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
   private mode = 'create';
   private postId: string;
   public post: Post;
   public isLoading = false;
   public form: FormGroup;
   public imagePreview: string;
-
+  private authStatusSub: Subscription;
   constructor(private postService: PostService,
-              public route: ActivatedRoute) {
+              public route: ActivatedRoute,
+              private authService: AuthService) {
   }
 
   ngOnInit() {
+    this.authStatusSub = this.authService.getAuthStatusListener().subscribe((authService) =>{
+        this.isLoading = false;
+    });
     this.form = new FormGroup({
       'title': new FormControl(null, {
         validators: [Validators.required, Validators.minLength(3)]
@@ -47,7 +53,8 @@ export class PostCreateComponent implements OnInit {
             id: response.post['_id'],
             title: response.post['title'],
             content: response.post['content'],
-            imagePath: response.post['imagePath']
+            imagePath: response.post['imagePath'],
+            creator: response.post['creator']
           };
           this.form.setValue({
             title: this.post.title,
@@ -69,10 +76,18 @@ export class PostCreateComponent implements OnInit {
     this.isLoading = true;
     if (this.form.value.title.length > 0 && this.form.value.content.length > 0) {
       if (this.mode === 'create') {
-        this.postService.addPosts(this.form.value.title, this.form.value.content, this.form.value.image);
+        this.postService.addPosts(
+          this.form.value.title,
+          this.form.value.content,
+          this.form.value.image
+        );
       } else {
-        console.log(this.form.value.image);
-        this.postService.updatePost(this.postId, this.form.value.title, this.form.value.content, this.form.value.image);
+        this.postService.updatePost(
+          this.postId,
+          this.form.value.title,
+          this.form.value.content,
+          this.form.value.image
+        );
       }
     }
     this.form.reset();
@@ -89,5 +104,9 @@ export class PostCreateComponent implements OnInit {
     reader.readAsDataURL(file);
     console.log(file);
     console.log(this.form);
+  }
+
+  ngOnDestroy(): void {
+    this.authStatusSub.unsubscribe();
   }
 }
